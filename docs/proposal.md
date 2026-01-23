@@ -10,6 +10,8 @@ title:  Proposal
 In a paragraph or so, describe the main idea behind your project. Focus on the problem setup, not the solution, i.e. what is your overall goal? If your project is application-driven, what is the application, i.e. the task or behavior that you want the learner / agent to have? If your project is method-driven, what is
 the method aiming to achieve and what is an example baseline method? At the very least, you should have a sentence that clearly explains the input/output semantics of your project, i.e. what information will it take as input, and what will it produce.
 
+For our project, we want to user reinforcement learning to create an agent that can play and beat Super Mario Brothers. Super Mario Brothers is a platform game released in 1985 that tasks the player with navigating through obstacles and enemies, as well as managing power ups to beat a series of levels. The controls are up, down, left, right, jump, or run (or attack depending on the powerup). Multiple inputs can be done at once, except for directional inputs which are mutually exclusive. We want our agent to be able to navigate through the game and minimize deaths. Using an OpenAI gym environment on the nes-py emulator, the agent will receive gameplay frames. When it receives the frame, our agent will use the policy it has learned to output the best move at that frame.
+
 ## Project goals (20 points)
 In a sentence or two each (optionally in a bulleted list), outline 3 levels of goals for the project. Each
 level can consist of a single task or behavior that you aim for the agent to do, or a single question you
@@ -24,6 +26,8 @@ aim to answer; or if not single then at most a couple related ones. The levels a
                     may not be realistic, although you could be pleasantly surprised, and anyway the point of this is a
                     “compass” of where the really amazing stuff could be.
 
+For the minimum goal of the project, we would like our agent to beat all 32 of the original levels in Super Mario Brothers.
+
 ## AI/ML Algorithms (10 points)
 In a single sentence, name the AI/ML algorithm(s) and method(s) you anticipate using for your project.
 It does not have to be a detailed description of any algorithm, even just the name of a class of methods
@@ -33,6 +37,7 @@ pruning”, and so on. You can take a guess at properties of the method that you
 model-free vs. model-based, on-policy vs. off-policy, etc. You won’t lose points for suggesting an
 incorrect algorithm or method, and you’ll be able to switch to different ones at any point that it makes
 sense later in the project.
+We plan to use reinforcement learning through Proximal Policy Optimization.
 
 ## Evaluation Plan (25 points)
 As described in class, mention how you will evaluate the success of your project. In a paragraph,
