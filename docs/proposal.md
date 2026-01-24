@@ -19,14 +19,16 @@ aim to answer; or if not single then at most a couple related ones. The levels a
 
 * **Minimum goal:** your most basic effort to get something done and working. If you only do this,
                     you’ll have positive learning experience that’s worth your time.
+  At minimum, we plan to train a reinforcement learning agent that can reliably and repeatedly complete all 32 original levels of the game using the standard OpenAI Gym Super Mario Bros. Environment. This includes setting up the environment, preprocessing visual input, defining the action space, and achieveing consistent level completion with a learned policy.
+
 * **Realistic goal:** your good and reasonable effort to do something cool and interesting. If you do
                     all of this, you’ll have a solid project you can be really happy about.
-
+  We plan to extend the agent to handle random variation across levels. We will do this by evaluating it on randomized sequences of subsets of levels provided in the Gym environment. Our agents should demonstrate learning capabilities and be able to complete different types of Mario levels rather than memorizing fixed levels.
+  
 * **Moonshot goal:** your best effort and dream result, if everything happens to go really well. This
                     may not be realistic, although you could be pleasantly surprised, and anyway the point of this is a
                     “compass” of where the really amazing stuff could be.
-
-For the minimum goal of the project, we would like our agent to beat all 32 of the original levels in Super Mario Brothers.
+Finally, if possible, we'd like to design and modify custom Mario levels and evaluate whether the trained agent can generalize its learned behavior to these new, unseen levels. That means whether the agent has learned general navigation and control strategies rather than overfitting to the game's original levels. This can be accomplished by letting the agent run on new or randomized levels, created manually or through random generation, and observing the number of attempts it needs to complete the level.
 
 ## AI/ML Algorithms (10 points)
 In a single sentence, name the AI/ML algorithm(s) and method(s) you anticipate using for your project.
@@ -37,6 +39,7 @@ pruning”, and so on. You can take a guess at properties of the method that you
 model-free vs. model-based, on-policy vs. off-policy, etc. You won’t lose points for suggesting an
 incorrect algorithm or method, and you’ll be able to switch to different ones at any point that it makes
 sense later in the project.
+
 We plan to use reinforcement learning through Proximal Policy Optimization.
 
 ## Evaluation Plan (25 points)
