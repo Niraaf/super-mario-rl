@@ -1,0 +1,23 @@
+# --- Python Basics ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- Virtual Environment ---
+venv/
+env/
+.env
+
+# --- VS Code Settings ---
+.vscode/
+
+# --- Mac OS Junk ---
+.DS_Store
+
+# --- RL Models & Data ---
+*.zip
+*.pkl
+*.h5
+tensorboard_logs/
+logs/
+models/
