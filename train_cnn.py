@@ -3,6 +3,17 @@ from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.callbacks import CheckpointCallback
+import os
+import time
+
+# generate a short timestamp
+timestamp = time.strftime("%m%d_%H%M")
+run_name = f"mario_cnn_{timestamp}"
+
+models_dir = "./models/"
+logs_dir = "./logs/"
+os.makedirs(models_dir, exist_ok=True)
+os.makedirs(logs_dir, exist_ok=True)
 
 from gym_super_mario_bros.smb_env import SuperMarioBrosEnv
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
@@ -28,27 +39,29 @@ model = PPO(
     n_epochs=10,
     gamma=0.99,
     gae_lambda=0.95,
-    tensorboard_log="./mario_tensorboard/",
+    tensorboard_log=logs_dir,
     device="auto",
 )
 
 # save model every 50,000 steps so we don't lose progress
 checkpoint_callback = CheckpointCallback(
-    save_freq=50000, save_path="./logs/", name_prefix="mario_cnn_model"
+    save_freq=50000, save_path=models_dir, name_prefix=run_name
 )
 
-# training phase
 print("------------------------------------------")
-print("  Vision System Online. Starting Training.")
-print("  Press Ctrl+C to stop and save.          ")
+print(f"  Run Name: {run_name}")
+print(f"  Models saving to: {models_dir}")
 print("------------------------------------------")
 
 try:
     model.learn(total_timesteps=1000000, callback=checkpoint_callback)
-    model.save("mario_cnn_final")
-    print("Training Finished! Model saved to 'mario_cnn_final.zip'")
+
+    final_path = os.path.join(models_dir, f"{run_name}_final")
+    model.save(final_path)
+    print(f"Training Finished! Saved to {final_path}.zip")
 
 except KeyboardInterrupt:
     print("\nTraining interrupted by user.")
-    model.save("mario_cnn_final")
-    print("Model saved to 'mario_cnn_final.zip'")
+    final_path = os.path.join(models_dir, f"{run_name}_interrupted")
+    model.save(final_path)
+    print(f"Saved partial model to {final_path}.zip")
