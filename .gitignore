@@ -20,3 +20,6 @@ env/
 *.h5
 tensorboard_logs/
 logs/
+
+# --- Saved gifs ---
+*.gif
