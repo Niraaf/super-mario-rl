@@ -61,5 +61,5 @@ os.makedirs(REPLAYS_DIR, exist_ok=True)
 save_path = os.path.join(REPLAYS_DIR, f"{model_name}.gif")
 
 print(f"Saving replay to {save_path}...")
-frames[0].save(save_path, save_all=True, append_images=frames[1:], duration=33, loop=0)
+frames[0].save(save_path, save_all=True, append_images=frames[1:], duration=66, loop=0)
 print("Done!")
