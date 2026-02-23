@@ -14,6 +14,7 @@ MODELS_DIR = "./models/"
 REPLAYS_DIR = "./replays/"
 
 from gym_super_mario_bros.smb_env import SuperMarioBrosEnv
+from gym_super_mario_bros.smb_random_stages_env import SuperMarioBrosRandomStagesEnv
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
 from nes_py.wrappers import JoypadSpace
 from shimmy.openai_gym_compatibility import GymV21CompatibilityV0
@@ -31,7 +32,8 @@ if not os.path.exists(model_path + ".zip"):
     print(f"Make sure your model is inside the '{MODELS_DIR}' folder.")
     exit()
 
-env = SuperMarioBrosEnv(rom_mode="vanilla", lost_levels=False, target=(1, 1))
+#env = SuperMarioBrosEnv(rom_mode="vanilla", lost_levels=False, target=(1, 1))
+env = SuperMarioBrosRandomStagesEnv()
 env = JoypadSpace(env, SIMPLE_MOVEMENT)
 env = GymV21CompatibilityV0(env=env, render_mode="rgb_array")
 env = apply_wrappers(env)
@@ -61,5 +63,5 @@ os.makedirs(REPLAYS_DIR, exist_ok=True)
 save_path = os.path.join(REPLAYS_DIR, f"{model_name}.gif")
 
 print(f"Saving replay to {save_path}...")
-frames[0].save(save_path, save_all=True, append_images=frames[1:], duration=33, loop=0)
+frames[0].save(save_path, save_all=True, append_images=frames[1:], duration=66, loop=0)
 print("Done!")

@@ -3,6 +3,6 @@ stable-baselines3[extra]
 shimmy>=1.3.0
 gym-super-mario-bros==7.4.0
 nes-py==8.2.1
-pyglet==1.5.27
+pyglet==1.5.21
 pillow
-numpy
+numpy<2.0.0
