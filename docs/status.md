@@ -34,11 +34,11 @@ Furthermore, when testing our 1-1 Champion model's generalization, we observed a
 Our generalized 10M+ timestep model demonstrated mediocre performance across most standard platforming levels, struggling to learn precise gap-jumping and enemy avoidance. However, it performed disproportionately well on water levels (e.g., World 2-2). This success was a direct result of our custom vertical reward shaping combined with swimming physics. Because swimming allows continuous vertical adjustment, the agent aggressively exploited the Y-axis reward to stay near the top of the screen. This allowed it to float over most threats and survive significantly longer, effectively bypassing its lack of fundamental platforming skills.
 
 ## Remaining Goals and Challenges
-plan on using incremental randomized level subsets
-(have model train on 1-1 and 1-2 until it passes, then on 1-1, 1-2, and 1-3 until it passes, etc)
+For the remainder of the quarter, we want to be able to create an agent that can somewhat consistently beat all the levels in the game. As of right now, with the ways we have trained the model, it is either a ultra specialist that can't do any other level, or it is bad to mediocre on all the levels. Compared to our original goals, our current goals are pretty similar. We can get models to beat each level individually, the hardest challenge is getting the model to generalize.
 
-goal recalibration (compare goals from proposal to what we were able to achieve rn)
+One way we plan on doing that is training the model on incremental randomized level subsets. For example, we have the model go until it beats 1-1. After that we do 1-1 and 1-2 until is passes. We continue this pattern until we can get the model to complete all 32 levels with this method. The potential challenges we face are not enough time and catastrophic unlearning. Training it to beat one level takes around 1.7M timesteps, so doing it with this method to try and get it to beat every level would take an incredible amount of time and compute power. Additionally, when it first start on the new level, it has no idea what to do, causing the reward function to crash.
 
-etc
+One other way that we plan to train it is to use subproc_vec_env from StableBaselines3 to allow the model to train on multiple environments at the same time. It forks different environments that run in parallel, and the model will train on all of them. It allows the agent to train n environments every step instead of 1, where n is a variable set to determine number of environments. The challenges with this model is that we do not know how the hyperparameters and custom reward function will interact with multiple environments. Additionally, since there are more timesteps per step due to the multiple environments, the graph is not as detailed, making it harder to analyze.
 
 ## Resources Used
+Gemeni to debug and help with dependencies
