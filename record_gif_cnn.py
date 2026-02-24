@@ -43,9 +43,11 @@ model = PPO.load(model_path)
 frames = []
 obs = env.reset()
 
-print("Recording gameplay (500 frames)...")
-for i in range(500):
-    action, _states = model.predict(obs)
+print("Recording gameplay (until death or victory)...")
+# Increased to 10,000 as a massive failsafe, but it will break early
+for i in range(10000):
+    # --- Turn off curiosity ---
+    action, _states = model.predict(obs, deterministic=False)
     obs, rewards, done, info = env.step(action)
 
     screen = env.render()
@@ -54,12 +56,14 @@ for i in range(500):
 
     frames.append(Image.fromarray(screen))
 
+    # --- Stop recording instantly ---
     if done:
-        obs = env.reset()
+        print(f"Run finished after {i} frames! Saving GIF...")
+        break
 
 os.makedirs(REPLAYS_DIR, exist_ok=True)
 save_path = os.path.join(REPLAYS_DIR, f"{model_name}.gif")
 
 print(f"Saving replay to {save_path}...")
 frames[0].save(save_path, save_all=True, append_images=frames[1:], duration=66, loop=0)
-print("Done!")
+print("Done! You can now watch Mario play at his absolute best.")
