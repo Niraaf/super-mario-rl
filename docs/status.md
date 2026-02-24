@@ -34,5 +34,11 @@ Furthermore, when testing our 1-1 Champion model's generalization, we observed a
 Our generalized 10M+ timestep model demonstrated mediocre performance across most standard platforming levels, struggling to learn precise gap-jumping and enemy avoidance. However, it performed disproportionately well on water levels (e.g., World 2-2). This success was a direct result of our custom vertical reward shaping combined with swimming physics. Because swimming allows continuous vertical adjustment, the agent aggressively exploited the Y-axis reward to stay near the top of the screen. This allowed it to float over most threats and survive significantly longer, effectively bypassing its lack of fundamental platforming skills.
 
 ## Remaining Goals and Challenges
+plan on using incremental randomized level subsets
+(have model train on 1-1 and 1-2 until it passes, then on 1-1, 1-2, and 1-3 until it passes, etc)
+
+goal recalibration (compare goals from proposal to what we were able to achieve rn)
+
+etc
 
 ## Resources Used
