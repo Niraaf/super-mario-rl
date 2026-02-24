@@ -26,12 +26,12 @@ class SkipFrame(gym.Wrapper):
         y_diff = current["y_pos"] - self.info["y_pos"]
         y_diff = 0.1 if y_diff > 0 else 0
         if(current['status'] == 'dead' or current['status'] == 'dead'):
-            return -50
+            return -20
         level_change = 0
         if(current['world'] > self.info['world'] or current['stage'] > self.info['stage']):
-            level_change = 100
+            level_change = 50
         self.info = current
-        return x_diff * 2 + y_diff -0.5 + level_change
+        return x_diff * 0.2 + y_diff -0.5 + level_change
     
 
     def step(self, action):
@@ -43,7 +43,7 @@ class SkipFrame(gym.Wrapper):
             obs, reward, terminated, truncated, info = self.env.step(action)
             current_reward = self.reward(info)
             total_reward += current_reward
-            if(current_reward == -50):
+            if(current_reward == -25):
                 return obs, -50, True, False, info
             done = terminated or truncated
             if done:

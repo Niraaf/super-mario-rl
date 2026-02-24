@@ -1,7 +1,8 @@
 import gymnasium as gym
 import torch
 from stable_baselines3 import PPO
-from stable_baselines3.common.vec_env import DummyVecEnv
+from stable_baselines3.common.vec_env import SubprocVecEnv
+from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.callbacks import CheckpointCallback
 import faulthandler
@@ -25,12 +26,19 @@ from nes_py.wrappers import JoypadSpace
 from shimmy.openai_gym_compatibility import GymV21CompatibilityV0
 from wrappers import apply_wrappers
 
-env = SuperMarioBrosRandomStagesEnv()
-env = JoypadSpace(env, SIMPLE_MOVEMENT)
-env = GymV21CompatibilityV0(env=env)
-env = apply_wrappers(env)
-env = Monitor(env)
-env = DummyVecEnv([lambda: env])
+def make_env(rank, seed=0):
+    def _init():
+        env = SuperMarioBrosRandomStagesEnv()
+        env = JoypadSpace(env, SIMPLE_MOVEMENT)
+        env = GymV21CompatibilityV0(env=env)
+        env = apply_wrappers(env)
+        env = Monitor(env)
+        env.reset(seed=seed + rank)
+        return env
+    set_random_seed(seed)
+    return _init
+
+env = SubprocVecEnv([make_env(i) for i in range(8)], start_method="fork")
 
 # init PPO Model with CNN
 
@@ -38,11 +46,10 @@ model = PPO(
     "CnnPolicy",
     env,
     verbose=1,
-    learning_rate=0.0002,
-    batch_size=256,
-    n_steps=8192,
+    batch_size=512,
+    n_steps=16384,
     n_epochs=15,
-    ent_coef=0.001,
+    ent_coef=0.005,
     clip_range = 0.1,
     target_kl=0.03,
     tensorboard_log=logs_dir,
