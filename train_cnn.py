@@ -10,6 +10,7 @@ from wrappers import apply_wrappers, MarioSubsetRandomizer
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
 from nes_py.wrappers import JoypadSpace
 from shimmy.openai_gym_compatibility import GymV21CompatibilityV0
+from gym_super_mario_bros.smb_env import SuperMarioBrosEnv
 
 # generate a short timestamp
 timestamp = time.strftime("%m%d_%H%M")
@@ -21,10 +22,19 @@ os.makedirs(models_dir, exist_ok=True)
 os.makedirs(logs_dir, exist_ok=True)
 
 target_pool = [(1, 1), (1, 2)]
+env_pool = []
 
-env = MarioSubsetRandomizer(target_pool)
-env = JoypadSpace(env, SIMPLE_MOVEMENT)
-env = GymV21CompatibilityV0(env=env)
+# Build and translate each environment individually
+for target in target_pool:
+    e = SuperMarioBrosEnv(rom_mode="vanilla", lost_levels=False, target=target)
+    e = JoypadSpace(e, SIMPLE_MOVEMENT)
+    e = GymV21CompatibilityV0(env=e)
+    env_pool.append(e)
+
+# Pass the translated environments into the randomizer
+env = MarioSubsetRandomizer(env_pool)
+
+# Apply standard observation wrappers and SB3 setup
 env = apply_wrappers(env)
 env = Monitor(env)
 env = DummyVecEnv([lambda: env])

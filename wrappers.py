@@ -54,13 +54,8 @@ class MarioSubsetRandomizer(gym.Wrapper):
     Custom wrapper to execute Curriculum Learning on a specific subset of levels.
     """
 
-    def __init__(self, targets):
-        self.envs = [
-            SuperMarioBrosEnv(rom_mode="vanilla", lost_levels=False, target=t)
-            for t in targets
-        ]
-
-        # Pick a random starting environment
+    def __init__(self, envs):
+        self.envs = envs
         self.current_env = random.choice(self.envs)
         super().__init__(self.current_env)
 
