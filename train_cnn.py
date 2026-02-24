@@ -5,12 +5,29 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.callbacks import CheckpointCallback
 import os
 import time
+import random
 
-from wrappers import apply_wrappers, MarioSubsetRandomizer
+from wrappers import apply_wrappers
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
 from nes_py.wrappers import JoypadSpace
 from shimmy.openai_gym_compatibility import GymV21CompatibilityV0
 from gym_super_mario_bros.smb_env import SuperMarioBrosEnv
+
+
+class MarioSubsetRandomizer(gym.Wrapper):
+    def __init__(self, envs):
+        self.envs = envs
+        self.current_env = random.choice(self.envs)
+        super().__init__(self.current_env)
+
+    def reset(self, **kwargs):
+        self.current_env = random.choice(self.envs)
+        self.env = self.current_env
+        return self.env.reset(**kwargs)
+
+    def step(self, action):
+        return self.env.step(action)
+
 
 # generate a short timestamp
 timestamp = time.strftime("%m%d_%H%M")

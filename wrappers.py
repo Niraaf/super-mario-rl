@@ -5,11 +5,13 @@ from gymnasium.wrappers import (
     FrameStackObservation,
 )
 import numpy as np
-import random
-from gym_super_mario_bros.smb_env import SuperMarioBrosEnv
 
 
 class SkipFrame(gym.Wrapper):
+    """
+    Skips frames to speed up training, returning the accumulated reward.
+    """
+
     def __init__(self, env, skip=4):
         super().__init__(env)
         self._skip = skip
@@ -20,7 +22,6 @@ class SkipFrame(gym.Wrapper):
         truncated = False
 
         for _ in range(self._skip):
-            # accumulate reward for every frame skipped
             obs, reward, terminated, truncated, info = self.env.step(action)
             total_reward += reward
             done = terminated or truncated
@@ -32,37 +33,18 @@ class SkipFrame(gym.Wrapper):
 
 def apply_wrappers(env):
     """
-    Applies standard Atari preprocessing.
+    Applies standard Atari/Mario preprocessing for the CNN feature extractor.
     """
-    # skip frames per decision
+    # skip frames per decision (4 frames = 1 step)
     env = SkipFrame(env, skip=4)
 
-    # resize to 84x84
+    # resize to 84x84 to reduce computational load
     env = ResizeObservation(env, shape=(84, 84))
 
-    # grayscale conversion
+    # grayscale conversion (color data isn't needed for Mario physics)
     env = GrayscaleObservation(env)
 
-    # stack last 4 frames to see movement
+    # stack last 4 frames to capture immediate velocity and acceleration
     env = FrameStackObservation(env, stack_size=4)
 
     return env
-
-
-class MarioSubsetRandomizer(gym.Wrapper):
-    """
-    Custom wrapper to execute Curriculum Learning on a specific subset of levels.
-    """
-
-    def __init__(self, envs):
-        self.envs = envs
-        self.current_env = random.choice(self.envs)
-        super().__init__(self.current_env)
-
-    def reset(self, **kwargs):
-        self.current_env = random.choice(self.envs)
-        self.env = self.current_env
-        return self.env.reset(**kwargs)
-
-    def step(self, action):
-        return self.env.step(action)

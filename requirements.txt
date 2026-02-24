@@ -6,3 +6,5 @@ nes-py==8.2.1
 pyglet==1.5.21
 pillow
 numpy<2.0.0
+sb3-contrib
+imageio

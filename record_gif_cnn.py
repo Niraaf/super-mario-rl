@@ -6,18 +6,18 @@ import numpy as np
 import os
 import argparse
 
+from gym_super_mario_bros.smb_env import SuperMarioBrosEnv
+from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
+from nes_py.wrappers import JoypadSpace
+from shimmy.openai_gym_compatibility import GymV21CompatibilityV0
+from wrappers import apply_wrappers
+
 parser = argparse.ArgumentParser(description="Record a GIF from a trained model.")
 parser.add_argument("model_name", help="Name of the model (e.g., mario_cnn_0207_1255)")
 args = parser.parse_args()
 
 MODELS_DIR = "./models/"
 REPLAYS_DIR = "./replays/"
-
-from gym_super_mario_bros.smb_env import SuperMarioBrosEnv
-from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
-from nes_py.wrappers import JoypadSpace
-from shimmy.openai_gym_compatibility import GymV21CompatibilityV0
-from wrappers import apply_wrappers
 
 model_name = args.model_name
 if model_name.endswith(".zip"):
@@ -31,39 +31,57 @@ if not os.path.exists(model_path + ".zip"):
     print(f"Make sure your model is inside the '{MODELS_DIR}' folder.")
     exit()
 
-env = SuperMarioBrosEnv(rom_mode="vanilla", lost_levels=False, target=(1, 1))
-env = JoypadSpace(env, SIMPLE_MOVEMENT)
-env = GymV21CompatibilityV0(env=env, render_mode="rgb_array")
-env = apply_wrappers(env)
-env = DummyVecEnv([lambda: env])
+# --- Create a dedicated folder for this specific model ---
+model_replay_dir = os.path.join(REPLAYS_DIR, model_name)
+os.makedirs(model_replay_dir, exist_ok=True)
 
+# Load the brain once
 print(f"Loading {model_name}...")
 model = PPO.load(model_path)
 
-frames = []
-obs = env.reset()
+# --- Define the subset of levels to evaluate ---
+target_pool = [(1, 1), (1, 2)]
 
-print("Recording gameplay (until death or victory)...")
-# Increased to 10,000 as a massive failsafe, but it will break early
-for i in range(10000):
-    # --- Turn off curiosity ---
-    action, _states = model.predict(obs, deterministic=False)
-    obs, rewards, done, info = env.step(action)
+# Loop through each level and record a separate GIF
+for world, stage in target_pool:
+    level_name = f"{world}-{stage}"
+    print(f"\n--- Setting up World {level_name} ---")
 
-    screen = env.render()
-    if len(screen.shape) == 4:
-        screen = screen[0]
+    # Build a fresh environment for the specific level
+    env = SuperMarioBrosEnv(
+        rom_mode="vanilla", lost_levels=False, target=(world, stage)
+    )
+    env = JoypadSpace(env, SIMPLE_MOVEMENT)
+    env = GymV21CompatibilityV0(env=env, render_mode="rgb_array")
+    env = apply_wrappers(env)
+    env = DummyVecEnv([lambda: env])
 
-    frames.append(Image.fromarray(screen))
+    obs = env.reset()
+    frames = []
 
-    # --- Stop recording instantly ---
-    if done:
-        print(f"Run finished after {i} frames! Saving GIF...")
-        break
+    print(f"Recording {level_name} gameplay (until death or victory)...")
+    for i in range(10000):
+        action, _states = model.predict(obs, deterministic=True)
+        obs, rewards, done, info = env.step(action)
 
-os.makedirs(REPLAYS_DIR, exist_ok=True)
-save_path = os.path.join(REPLAYS_DIR, f"{model_name}.gif")
+        screen = env.render()
+        if len(screen.shape) == 4:
+            screen = screen[0]
 
-print(f"Saving replay to {save_path}...")
-frames[0].save(save_path, save_all=True, append_images=frames[1:], duration=66, loop=0)
-print("Done! You can now watch Mario play at his absolute best.")
+        frames.append(Image.fromarray(screen))
+
+        if done:
+            print(f"Run finished after {i} frames!")
+            break
+
+    # --- Save the GIF with the level name ---
+    save_path = os.path.join(model_replay_dir, f"{level_name}.gif")
+    print(f"Saving replay to {save_path}...")
+    frames[0].save(
+        save_path, save_all=True, append_images=frames[1:], duration=66, loop=0
+    )
+
+    # --- Destroy the environment before the loop restarts ---
+    env.close()
+
+print(f"\nAll done! GIFs saved in: {model_replay_dir}")
