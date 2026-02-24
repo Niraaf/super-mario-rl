@@ -20,9 +20,9 @@ logs_dir = "./logs/"
 os.makedirs(models_dir, exist_ok=True)
 os.makedirs(logs_dir, exist_ok=True)
 
-env_pool = ["SuperMarioBros-1-1-v0", "SuperMarioBros-1-2-v0"]
+target_pool = [(1, 1), (1, 2)]
 
-env = MarioSubsetRandomizer(env_pool)
+env = MarioSubsetRandomizer(target_pool)
 env = JoypadSpace(env, SIMPLE_MOVEMENT)
 env = GymV21CompatibilityV0(env=env)
 env = apply_wrappers(env)

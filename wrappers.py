@@ -6,6 +6,7 @@ from gymnasium.wrappers import (
 )
 import numpy as np
 import random
+from gym_super_mario_bros.smb_env import SuperMarioBrosEnv
 
 
 class SkipFrame(gym.Wrapper):
@@ -51,28 +52,21 @@ def apply_wrappers(env):
 class MarioSubsetRandomizer(gym.Wrapper):
     """
     Custom wrapper to execute Curriculum Learning on a specific subset of levels.
-    Prevents catastrophic forgetting by randomly selecting a level
-    from the 'Expanding Pool' upon every episode reset.
     """
 
-    def __init__(self, env_ids):
-        # Initialize all environments in our current curriculum pool
-        self.envs = [gym.make(env_id) for env_id in env_ids]
+    def __init__(self, targets):
+        self.envs = [
+            SuperMarioBrosEnv(rom_mode="vanilla", lost_levels=False, target=t)
+            for t in targets
+        ]
 
         # Pick a random starting environment
         self.current_env = random.choice(self.envs)
-
-        # Inherit properties from the chosen environment to satisfy Gym
         super().__init__(self.current_env)
 
     def reset(self, **kwargs):
-        # THE CORE LOGIC: Every time Mario dies or beats a level,
-        # roll the dice and completely swap the active physical environment
         self.current_env = random.choice(self.envs)
-
-        # Overwrite the wrapped environment pointer
         self.env = self.current_env
-
         return self.env.reset(**kwargs)
 
     def step(self, action):
