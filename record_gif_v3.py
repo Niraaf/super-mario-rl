@@ -33,7 +33,7 @@ model_folder_name = clean_filename.replace(".zip", "")
 SAVE_DIR = f"./replays/{model_folder_name}/"
 os.makedirs(SAVE_DIR, exist_ok=True)
 
-LEVELS_TO_TEST = [(1, 1), (1, 2), (1, 3), (1, 4)]
+LEVELS_TO_TEST = [(1, 1)]
 
 
 def make_eval_env(target):
