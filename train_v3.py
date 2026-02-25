@@ -1,3 +1,4 @@
+import sys
 import gymnasium as gym
 import os
 import time
@@ -69,6 +70,41 @@ class EntropyDecayCallback(BaseCallback):
         return True
 
 
+class CurriculumTrackerCallback(BaseCallback):
+    """
+    Reaches into the ErrorDrivenCurriculumWrapper to log the current
+    unlocked level and the win rate of the active frontier.
+    """
+
+    def __init__(self, verbose=0):
+        super().__init__(verbose)
+
+    def _on_step(self) -> bool:
+        try:
+            # get_attr pulls the variables from the vectorized wrapper
+            unlocked_idx = self.training_env.get_attr("unlocked_index")[0]
+            progression = self.training_env.get_attr("progression_path")[0]
+            histories = self.training_env.get_attr("level_histories")[0]
+
+            # Calculate the exact win rate of whatever the current frontier is
+            frontier_target = progression[unlocked_idx]
+            history = histories[frontier_target]
+
+            # Prevent division by zero if history is empty
+            if len(history) > 0:
+                win_rate = sum(history) / len(history)
+            else:
+                win_rate = 0.0
+
+            self.logger.record("curriculum/unlocked_index", unlocked_idx)
+            self.logger.record("curriculum/frontier_win_rate", win_rate)
+
+        except Exception as e:
+            pass
+
+        return True
+
+
 # --- Environment Construction ---
 def make_env():
     target_pool = [(1, 1), (1, 2), (1, 3), (1, 4)]
@@ -92,12 +128,15 @@ def make_env():
 env = DummyVecEnv([make_env])
 
 # --- Load or Start Fresh ---
-LOAD_MODEL = False
-# If LOAD_MODEL is True, paste the exact zip name below:
-LOAD_FROM = "models/mario_lstm_phase3_INSERT_NAME_HERE.zip"
 TOTAL_TIMESTEPS = 10_000_000
 
-if LOAD_MODEL:
+if len(sys.argv) > 1:
+    model_name = sys.argv[1]
+    if not model_name.endswith(".zip"):
+        model_name += ".zip"
+
+    LOAD_FROM = os.path.join("models", model_name)
+
     print(f"------------------------------------------")
     print(f"  RESUMING PHASE 3 FROM: {LOAD_FROM}")
     print(f"------------------------------------------")
@@ -132,7 +171,11 @@ checkpoint_callback = CheckpointCallback(
 entropy_callback = EntropyDecayCallback(
     initial_ent_coef=0.05, final_ent_coef=0.001, total_timesteps=TOTAL_TIMESTEPS
 )
-callback_list = CallbackList([checkpoint_callback, entropy_callback])
+curriculum_callback = CurriculumTrackerCallback()
+
+callback_list = CallbackList(
+    [checkpoint_callback, entropy_callback, curriculum_callback]
+)
 
 try:
     print(f"Beginning LSTM training for {TOTAL_TIMESTEPS} timesteps...")
