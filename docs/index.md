@@ -23,8 +23,14 @@ We are training a reinforcement learning agent to play and beat **Super Mario Br
 
 The agent observes the game through stacked grayscale frames (84×84, 4 frames) and outputs one of 7 simplified actions (SIMPLE_MOVEMENT). It is trained using PPO with a CNN policy via Stable-Baselines3 on the `gym-super-mario-bros` environment running on a NES-Py emulator.
 
-![Mario Gameplay Screenshot](assets/mario_preview.gif)
-*(Example agent gameplay — generated from a trained checkpoint)*
+![Mario Gameplay Gif](assets/mario_demo1.gif)
+
+*(Example agent gameplay generated from a trained checkpoint on level 1-1 at 1.75 million timesteps)*
+
+
+![Mario Gameplay Gif](assets/mario_demo2.gif)
+
+*(Example agent gameplay generated from a trained checkpoint on level 1-1 -- the fastest clear so far)*
 
 ---
 
