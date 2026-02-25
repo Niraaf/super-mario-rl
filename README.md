@@ -42,5 +42,5 @@ This script loads a trained model from models/ and generates a GIF in replays/.
 Example: If your model file is models/mario_cnn_0207_1230.zip:
 
 ```bash
-python record_cnn.py mario_cnn_0207_1230
+python record_gif_cnn.py mario_cnn_0207_1230
 ```
