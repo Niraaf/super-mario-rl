@@ -1,6 +1,6 @@
 import gymnasium as gym
 from stable_baselines3 import PPO
-from stable_baselines3.common.vec_env import DummyVecEnv
+from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 from PIL import Image
 import numpy as np
 import os
@@ -36,6 +36,16 @@ env = JoypadSpace(env, SIMPLE_MOVEMENT)
 env = GymV21CompatibilityV0(env=env, render_mode="rgb_array")
 env = apply_wrappers(env)
 env = DummyVecEnv([lambda: env])
+
+# load VecNormalize stats if a matching .pkl file exists alongside the model
+vecnorm_path = model_path + "_vecnorm.pkl"
+if os.path.exists(vecnorm_path):
+    print(f"Found VecNormalize stats at: {vecnorm_path}")
+    env = VecNormalize.load(vecnorm_path, env)
+    env.training = False    # freeze running stats — don't update them during recording
+    env.norm_reward = False  # don't normalize rewards at inference time, only observations matter
+else:
+    print("No VecNormalize stats found — running without reward normalization.")
 
 print(f"Loading {model_name}...")
 model = PPO.load(model_path)
