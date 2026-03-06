@@ -128,7 +128,7 @@ def make_env():
 env = DummyVecEnv([make_env])
 
 # --- Load or Start Fresh ---
-TOTAL_TIMESTEPS = 10_000_000
+TOTAL_TIMESTEPS = 3_000_000
 
 if len(sys.argv) > 1:
     model_name = sys.argv[1]
@@ -169,7 +169,9 @@ checkpoint_callback = CheckpointCallback(
     save_freq=50_000, save_path=MODELS_DIR, name_prefix=run_name
 )
 entropy_callback = EntropyDecayCallback(
-    initial_ent_coef=0.05, final_ent_coef=0.001, total_timesteps=TOTAL_TIMESTEPS
+    initial_ent_coef=0.03,
+    final_ent_coef=0.005,
+    total_timesteps=TOTAL_TIMESTEPS,
 )
 curriculum_callback = CurriculumTrackerCallback()
 

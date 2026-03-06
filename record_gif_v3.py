@@ -33,7 +33,7 @@ model_folder_name = clean_filename.replace(".zip", "")
 SAVE_DIR = f"./replays/{model_folder_name}/"
 os.makedirs(SAVE_DIR, exist_ok=True)
 
-LEVELS_TO_TEST = [(1, 1)]
+LEVELS_TO_TEST = [(1, 1), (1, 2)]
 
 
 def make_eval_env(target):
@@ -69,7 +69,7 @@ for target in LEVELS_TO_TEST:
 
     while not done:
         action, lstm_states = model.predict(
-            obs, state=lstm_states, episode_start=episode_starts, deterministic=True
+            obs, state=lstm_states, episode_start=episode_starts, deterministic=False
         )
 
         obs, reward, dones, info = env.step(action)
