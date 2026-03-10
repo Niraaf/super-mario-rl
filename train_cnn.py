@@ -1,3 +1,6 @@
+import multiprocessing
+multiprocessing.set_start_method('fork', force=True)
+
 import gymnasium as gym
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import SubprocVecEnv, VecNormalize
@@ -69,6 +72,7 @@ class SaveVecNormalizeCallback(BaseCallback):
                 f"{self.name_prefix}_{self.num_timesteps}_steps_vecnorm.pkl"
             )
             self.vec_env.save(path)
+            print(f"VecNormalize stats saved to {path}")
         return True
 
 checkpoint_callback = CheckpointCallback(
@@ -93,12 +97,16 @@ try:
 
     final_path = os.path.join(models_dir, f"{run_name}_final")
     model.save(final_path)
-    env.save(os.path.join(models_dir, f"{run_name}_final_vecnorm.pkl"))
+    vecnorm_final_path = os.path.join(models_dir, f"{run_name}_final_vecnorm.pkl")
+    env.save(vecnorm_final_path)
     print(f"Training Finished! Saved to {final_path}.zip")
+    print(f"VecNormalize stats saved to {vecnorm_final_path}")
 
 except KeyboardInterrupt:
     print("\nTraining interrupted by user.")
     final_path = os.path.join(models_dir, f"{run_name}_interrupted")
     model.save(final_path)
-    env.save(os.path.join(models_dir, f"{run_name}_interrupted_vecnorm.pkl"))
+    vecnorm_interrupted_path = os.path.join(models_dir, f"{run_name}_interrupted_vecnorm.pkl")
+    env.save(vecnorm_interrupted_path)
     print(f"Saved partial model to {final_path}.zip")
+    print(f"VecNormalize stats saved to {vecnorm_interrupted_path}")
