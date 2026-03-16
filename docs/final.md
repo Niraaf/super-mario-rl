@@ -38,11 +38,22 @@ We evaluated our models quantitatively via TensorBoard metrics and qualitatively
 **Method 1: State Aliasing & Domain Shift**
 Our 1-1 specialized model converged around 1.8M timesteps. The stochastic policy achieved a 310-frame clear, while the deterministic policy executed a 393-frame clear. However, evaluating checkpoints beyond 2.2M steps with `deterministic=True` revealed severe policy degradation. The agent attempted to over-optimize forward momentum to minimize clock penalties at the final staircase, resulting in a sub-pixel wall collision. Because the 4-frame stack cannot distinguish "standing still" from "moving right but blocked by a wall," this caused state aliasing—trapping the agent in an infinite "run right" loop. Furthermore, dropping this specialized agent into World 1-2 resulted in failure within 23 frames. The CNN filters had overfit to the bright daylight palette, rendering the agent effectively "blind" to the contrast inversion of the dark underground.
 
+![Specialist on level 1-1](/docs/assets/specialist_1-1.gif)
+![Specialist on level 1-2](/docs/assets/specialist_1-2.gif)
+
 **Method 2: Reward Exploitation**
 The generalized 10M timestep model demonstrated mediocre performance across standard platforming levels, struggling with precise gap-jumping. However, it performed disproportionately well on water levels (e.g., World 2-2). Because swimming allows continuous vertical adjustment, the agent aggressively exploited our custom Y-axis reward to stay near the top of the screen, bypassing threats entirely. This demonstrated emergent exploitation of reward shaping rather than learned navigation.
 
+![Generalist on random levels](/docs/assets/generalist_random.gif)
+![Generalist on level 1-1](/docs/assets/generalist_1-1.gif)
+
 **Method 3: Breaking Local Minimums & The Compute Bottleneck**
 The LSTM model successfully resolved the 4-frame stack state aliasing. Around 800k timesteps, the Critic network's explained_variance spiked to 0.96, proving the LSTM had finally calibrated to predict long-term jump trajectories. The agent successfully learned to sprint deep into the level, navigating the final 1-1 staircase that previously trapped Method 1.However, as exploration (entropy) decayed to 0.5%, the algorithm locked into a wide local minimum, determining that safely securing 1,900 points was mathematically safer than risking early death to experiment with the precise flagpole jump. The agent eventually averaged a 25% win rate, peaking at 35% in a 100-game window. Because it never hit the 80% promotion threshold, the curriculum wrapper successfully prevented promotion to 1-2.Crucially, the TensorBoard metrics showed that both the frontier win rate and episodic reward mean were maintaining a steady, upward trajectory when training concluded. The strict 80% promotion threshold simply proved to be a compute bottleneck for the project's timeframe. Recurrent policies require exponentially more training timesteps than standard CNNs - given a longer training horizon and a higher sustained entropy floor to encourage continued exploration of the flagpole jump, the data strongly suggests the LSTM would eventually break the threshold and graduate to future levels. When we manually forced the 12M step LSTM model into World 1-2 for a zero-shot generalization test, it failed instantly, confirming that Out-of-Distribution (OOD) visual domain shift remains the ultimate bottleneck.
+
+![RecurrentPPO reward graph](/docs/assets/lstm_tensorboard.png)
+![RecurrentPPO winrate graph](/docs/assets/lstm_winrate.png)
+![RecurrentPPO on level 1-1](/docs/assets/lstm_1-1.gif)
+![RecurrentPPO on level 1-2](/docs/assets/lstm_1-2.gif)
 
 ## Resources Used
 
