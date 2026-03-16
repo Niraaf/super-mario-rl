@@ -44,24 +44,31 @@ def linear_schedule(initial_value: float) -> Callable[[float], float]:
 class EntropyDecayCallback(BaseCallback):
     """
     Dynamically decays the entropy coefficient over the training run.
-    Starts high for exploration, ends low for exploitation.
+    Anchors to the current timestep so it works perfectly when resuming models!
     """
 
     def __init__(
         self,
-        initial_ent_coef=0.05,
-        final_ent_coef=0.001,
-        total_timesteps=10_000_000,
+        initial_ent_coef=0.03,
+        final_ent_coef=0.005,
+        total_timesteps=3_000_000,
         verbose=0,
     ):
         super().__init__(verbose)
         self.initial_ent_coef = initial_ent_coef
         self.final_ent_coef = final_ent_coef
-        self.total_timesteps = total_timesteps
+        self.run_total_timesteps = total_timesteps
+        self.start_timesteps = None
 
     def _on_step(self) -> bool:
-        progress = 1.0 - (self.num_timesteps / self.total_timesteps)
+        if self.start_timesteps is None:
+            self.start_timesteps = self.num_timesteps
+
+        steps_this_run = self.num_timesteps - self.start_timesteps
+
+        progress = 1.0 - (steps_this_run / self.run_total_timesteps)
         progress = max(0.0, progress)
+
         current_ent_coef = self.final_ent_coef + progress * (
             self.initial_ent_coef - self.final_ent_coef
         )
@@ -116,8 +123,9 @@ def make_env():
         e = GymV21CompatibilityV0(env=e, render_mode="rgb_array")
         env_pool.append((target, e))
     env = ErrorDrivenCurriculumWrapper(
-        env_pool, win_window=20, promote_win_rate=0.80, epsilon=0.1
+        env_pool, win_window=100, promote_win_rate=0.20, epsilon=0.1
     )
+    env.unlocked_index = 1  # overriding to include 1-2 from the start
     env = apply_wrappers(env)
     env = AntiStallWrapper(env, stall_threshold=120, penalty=-2.0)
     env = Monitor(env)
@@ -128,7 +136,7 @@ def make_env():
 env = DummyVecEnv([make_env])
 
 # --- Load or Start Fresh ---
-TOTAL_TIMESTEPS = 3_000_000
+TOTAL_TIMESTEPS = 5_000_000
 
 if len(sys.argv) > 1:
     model_name = sys.argv[1]
@@ -140,9 +148,16 @@ if len(sys.argv) > 1:
     print(f"------------------------------------------")
     print(f"  RESUMING PHASE 3 FROM: {LOAD_FROM}")
     print(f"------------------------------------------")
+
+    custom_objects = {
+        "learning_rate": 1.5e-4,
+        "lr_schedule": 1.5e-4,
+    }
+
     model = RecurrentPPO.load(
         LOAD_FROM,
         env=env,
+        custom_objects=custom_objects,
         tensorboard_log=LOG_DIR,
         device="auto",
     )

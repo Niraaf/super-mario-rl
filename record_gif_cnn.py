@@ -61,7 +61,7 @@ for world, stage in target_pool:
 
     print(f"Recording {level_name} gameplay (until death or victory)...")
     for i in range(10000):
-        action, _states = model.predict(obs, deterministic=True)
+        action, _states = model.predict(obs, deterministic=False)
         obs, rewards, done, info = env.step(action)
 
         screen = env.render()
