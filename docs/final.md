@@ -23,7 +23,25 @@ We hyper-tuned a model exclusively on World 1-1 to study deterministic execution
 
 **Method 2: The Generalist (Randomized Training & Reward Shaping)**
 We trained a separate long-horizon agent for over 10 million+ timesteps across randomized environments. For this model, we engineered a custom reward function that heavily incentivized vertical (Y-axis) movement alongside standard rightward progression to encourage jumping and exploration:
-`[REWARD FUNCTION DETAILS HERE - prof said we should include exact function]`
+`
+    x_diff = info["x_pos"] - self.info["x_pos"]
+    y_diff = info["y_pos"] - self.info["y_pos"] 
+    is_dead = info['status'] == 'dead' or info['status'] == 'dying'
+    flag_get = info['flag_get']
+
+    step_reward = (x_diff * 0.1) - 0.2
+    if(y_diff > 0):
+        step_reward += 0.05
+    if is_dead:
+        step_reward -= 250
+        done = True
+    if flag_get:
+        step_reward += 150
+        done = True
+
+    self.info = info
+    total_reward += step_reward
+`
 
 **Method 3: Recurrent Policy & Curriculum Learning (CNN + LSTM)**
 To address failures observed in the first two methods (state aliasing and catastrophic forgetting), we overhauled the architecture to use `RecurrentPPO` from `sb3-contrib`. 
