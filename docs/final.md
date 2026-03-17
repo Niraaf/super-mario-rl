@@ -4,7 +4,7 @@ title: Final Report
 ---
 
 # {{ page.title }}
-[video]
+<iframe width="560" height="315" src="https://www.youtube.com/embed/Dcaue1OmFxU?si=mCj-EcgdJDgsGKP1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 ## Project Summary
 
