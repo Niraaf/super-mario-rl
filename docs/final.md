@@ -76,6 +76,7 @@ The LSTM model successfully resolved the 4-frame stack state aliasing. Around 80
 
 ![RecurrentPPO reward graph](assets/lstm_tensorboard.png)
 ![RecurrentPPO winrate graph](assets/lstm_winrate.png)
+
 ![RecurrentPPO on level 1-1](assets/lstm_1-1.gif)
 ![RecurrentPPO on level 1-2](assets/lstm_1-2.gif)
 
