@@ -20,7 +20,7 @@ logs_dir = "./logs/"
 os.makedirs(models_dir, exist_ok=True)
 os.makedirs(logs_dir, exist_ok=True)
 
-from gym_super_mario_bros.smb_random_stages_env import SuperMarioBrosRandomStagesEnv
+from gym_super_mario_bros.smb_random_stages_env import SuperMarioBrosEnv, SuperMarioBrosRandomStagesEnv
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
 from nes_py.wrappers import JoypadSpace
 from shimmy.openai_gym_compatibility import GymV21CompatibilityV0
@@ -29,6 +29,7 @@ from wrappers import apply_wrappers
 def make_env(rank, seed=0):
     def _init():
         env = SuperMarioBrosRandomStagesEnv()
+        #env = SuperMarioBrosEnv(rom_mode="vanilla", lost_levels=False, target=(1, 1))
         env = JoypadSpace(env, SIMPLE_MOVEMENT)
         env = GymV21CompatibilityV0(env=env)
         env = apply_wrappers(env)
@@ -46,17 +47,18 @@ model = PPO(
     "CnnPolicy",
     env,
     verbose=1,
-    batch_size=512,
-    n_steps=16384,
-    n_epochs=15,
-    ent_coef=0.005,
+    learning_rate=0.000005,
+    batch_size=256,
+    n_steps=4096,
+    ent_coef=0.0005,
+    gamma = 0.998,
     clip_range = 0.1,
-    target_kl=0.03,
+    target_kl = 0.3,
     tensorboard_log=logs_dir,
     device="auto",
 )
 
-#model = PPO.load("./models/mario_cnn_0212_2136_final.zip", env=env, tensorboard_log=logs_dir, device="auto")
+#model = PPO.load("./models/mario_cnn_0226_1232_final.zip", env=env, tensorboard_log=logs_dir, device="auto")
 # save model every 50,000 steps so we don't lose progress
 checkpoint_callback = CheckpointCallback(
     save_freq=100000, save_path=models_dir, name_prefix=run_name
@@ -68,7 +70,7 @@ print(f"  Models saving to: {models_dir}")
 print("------------------------------------------")
 
 try:
-    model.learn(total_timesteps=20000000, callback=checkpoint_callback, reset_num_timesteps=False)
+    model.learn(total_timesteps=100000000, callback=checkpoint_callback, reset_num_timesteps=False)
 
     final_path = os.path.join(models_dir, f"{run_name}_final")
     model.save(final_path)
