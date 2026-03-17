@@ -8,9 +8,15 @@ title: Final Report
 
 ## Project Summary
 
-[Part of the evaluation will be on how well you are able to
-motivate what’s interesting and challenging about the problem, i.e. why it is not trivial, and
-why you need AI/ML algorithms to solve it.]
+Super Mario Bros is a 1985 side-scrolling platform game where the player jumps over obstacles, avoids enemies, and races through 32 distinct levels with unique mechanics to reach a flagpole at the end of each stage. Our goal was to train a reinforcement learning agent to do the same thing, but using only raw pixel input. No scripted rules, no access to the game’s internal memory, and no hand-labeled training data.
+
+    This is a harder problem than it might first appear. The agent sees the world as a stream of image frames and learns entirely from a sparse reward signal based on how far right it moves, how long it takes, and whether it dies. There is no label telling it "this is an enemy" or "this gap requires a running start." It has to figure out spatial relationships, enemy timing, and momentum management purely through trial and error, across hundreds of thousands of game interactions. Even worse, the 32 levels have completely different layouts, visual themes, and enemy placements. Skills learned on one level do not automatically transfer to another, so the agent is not just learning to play a game; it is learning to generalize across a set of environments that are superficially similar but mechanically distinct.
+
+This is exactly where rule-based approaches fall short. You could hardcode a path through World 1-1, but that path is useless on 1-2. Reinforcement learning is the natural fit here because the agent can discover its own strategies from experience, adapting its policy based on what does and does not produce reward. We use Proximal Policy Optimization (PPO) with a convolutional neural network (CNN) policy to process the visual input, which is the standard approach for Atari-style environments and gives us a well-understood baseline to build on.
+
+![Mario agent gameplay on level 1-1](assets/mario_demo2.gif)
+
+Our minimum goal was to reliably clear individual levels. Our realistic goal was to build an agent that could generalize across level types without retraining from scratch. Our moonshot goal was to handle novel or custom levels the agent had never seen before. To push toward those goals, we ran three parallel training tracks: a hyper-specialized 1-1 champion, a generalist trained across randomized levels with custom reward shaping, and a recurrent policy with curriculum learning designed to fix the failure modes we found in the first two.
 
 ## Approach
 
